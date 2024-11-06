@@ -3,6 +3,9 @@ package com.typingTitans.lobotomy_lab.services;
 import com.typingTitans.lobotomy_lab.entities.Lab;
 import com.typingTitans.lobotomy_lab.repositories.LabRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
@@ -13,6 +16,9 @@ import java.util.Optional;
 
 @Service
 public class LabService {
+
+    @Autowired
+    private MongoTemplate mongoTemplate;
 
     @Autowired
     private LabRepository labRepository;
@@ -29,6 +35,22 @@ public class LabService {
         return labRepository.findByRoomName(roomName);
     }
 
+    public List<Lab> findByFilters(String roomName, Long computers, String software) {
+        Query query = new Query();
+
+        if (roomName != null) {
+            query.addCriteria(Criteria.where("roomName").regex(roomName, "i"));
+        }
+        if (computers != null) {
+            query.addCriteria(Criteria.where("computers").gte(computers));
+        }
+        if (software != null) {
+            query.addCriteria(Criteria.where("availableSoftwares").in(software)); // Verifica se o software está na lista
+        }
+
+        return mongoTemplate.find(query, Lab.class);
+    }
+    
     public List<Lab> findByNumberOfComputers(Long computers) {
         return labRepository.findByComputers(computers);
     }

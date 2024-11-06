@@ -20,23 +20,22 @@ public class LabController{
     public List<Lab> getAllLabs() {
         return labService.findAll();
     }
-
-    @GetMapping("findByRoomName/{roomName}")
-    public ResponseEntity<Lab> getLabRoomName(@PathVariable String roomName) {
-        return labService.findByRoomName(roomName)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+    
+    @GetMapping("/findLab")
+    public ResponseEntity<List<Lab>> findLab(
+            @RequestParam(required = false) String roomName,
+            @RequestParam(required = false) Long computers,
+            @RequestParam(required = false) String software) {
+    
+        List<Lab> labs = labService.findByFilters(roomName, computers, software);
+    
+        if (labs.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        } else {
+            return ResponseEntity.ok(labs);
+        }
     }
-
-    @GetMapping("findByComputers/{computers}")
-    public List<Lab> getLabByQuantityOfComputers(@PathVariable long computers) {
-        return labService.findByNumberOfComputers(computers);
-    }
-
-    @GetMapping("findByinstalledSoftware/{software}")
-    public List<Lab> getLabByQuantityOfComputers(@PathVariable String software) {
-        return labService.findBySoftware(software);
-    }
+    
 
 
     @PostMapping
